@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>드로잉 캔버스</title>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 1.8em;
+    }
+
+    .canvas-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 50px;
+      justify-content: space-around;
+      align-content: stretch;
+      align-items: baseline;
+      justify-items: center;
+      margin: 50px;
+    }
+
+    .canvas {
+      width: 350px;
+      height: 350px;
+      border: 1px solid #000;
+      grid-row-gap: 5px;
+      background-size: cover;
+      background-position: center;
+    }
+
+    #canvas1 { background-image: url('1.jpg'); }
+    #canvas2 { background-image: url('2.jpg'); }
+    #canvas3 { background-image: url('3.jpg'); }
+    #canvas4 { background-image: url('4.jpg'); }
+    #canvas5 { background-image: url('5.jpg'); }
+    #canvas6 { background-image: url('6.jpg'); }
+
+    #toolbar-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #toolbar {
+      display: flex;
+      align-items: center;
+    }
+
+    #toolbar button {
+      margin: 5px;
+      background-color: black;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      cursor: pointer;
+      border-radius: 30px;
+    }
+
+    #toolbar button:hover {
+      background-color: blue;
+    }
+
+    .input-container {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .input-box {
+      margin-right: 10px;
+      width: 200px;
+      box-sizing: border-box;
+      font-size: 1em;
+      margin-left: 300px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="canvas-container">
+    <canvas class="canvas" id="canvas1"></canvas>
+    <canvas class="canvas" id="canvas2"></canvas>
+    <canvas class="canvas" id="canvas3"></canvas>
+    <canvas class="canvas" id="canvas4"></canvas>
+    <canvas class="canvas" id="canvas5"></canvas>
+    <canvas class="canvas" id="canvas6"></canvas>
+  </div>
+
+  <div id="toolbar-container">
+    <div id="toolbar">
+      <input type="color" id="colorPicker" value="#0000ff" />
+      <input type="range" id="lineWidth" min="1" max="10" value="2" />
+      <button id="clear">Clear</button>
+      <button id="undo">Undo</button>
+      <button id="done">Done</button>
+    </div>
+  </div>
+
+  <div id="input-container" style="display: none;">
+    <input type="text" class="input-box" id="input1" placeholder="Canvas 1">
+    <input type="text" class="input-box" id="input2" placeholder="Canvas 2">
+    <input type="text" class="input-box" id="input3" placeholder="Canvas 3">
+    <input type="text" class="input-box" id="input4" placeholder="Canvas 4">
+    <input type="text" class="input-box" id="input5" placeholder="Canvas 5">
+    <input type="text" class="input-box" id="input6" placeholder="Canvas 6">
+  </div>
+
+  <script>
+    const canvasContainer = document.querySelector('.canvas-container');
+    const canvases = document.querySelectorAll('.canvas');
+    const toolbar = document.getElementById('toolbar');
+    const colorPicker = document.getElementById('colorPicker');
+    const lineWidthInput = document.getElementById('lineWidth');
+    const clearButton = document.getElementById('clear');
+    const undoButton = document.getElementById('undo');
+    const doneButton = document.getElementById('done');
+    const inputContainer = document.getElementById('input-container');
+
+    let currentCanvas;
+    let currentContext;
+    let isPainting = false;
+    let lineWidth = 2;
+    let drawingHistory = [];
+
+    canvases.forEach(canvas => {
+      canvas.addEventListener('mousedown', startPainting);
+      canvas.addEventListener('mouseup', stopPainting);
+      canvas.addEventListener('mousemove', draw);
+    });
+
+    toolbar.addEventListener('input', handleToolbarInput);
+    clearButton.addEventListener('click', clearCanvas);
+    undoButton.addEventListener('click', undoDrawing);
+    doneButton.addEventListener('click', finishDrawing);
+
+    function getCanvasCoordinates(canvas, event) {
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: event.clientX - rect.left,
+    y: event.clientY - rect.top
+  };
+}
+
+function startPainting(e) {
+  isPainting = true;
+  currentCanvas = e.target;
+  currentContext = currentCanvas.getContext('2d');
+  const coordinates = getCanvasCoordinates(currentCanvas, e);
+  currentContext.beginPath();
+  currentContext.moveTo(coordinates.x, coordinates.y);
+}
+
+    function stopPainting() {
+      isPainting = false;
+      drawingHistory.push(currentContext.getImageData(0, 0, currentCanvas.width, currentCanvas.height));
+    }
+
+function draw(e) {
+  if (!isPainting) return;
+  const coordinates = getCanvasCoordinates(currentCanvas, e);
+  currentContext.lineWidth = lineWidth;
+  currentContext.lineCap = 'round';
+  currentContext.strokeStyle = colorPicker.value;
+  currentContext.lineTo(coordinates.x, coordinates.y);
+  currentContext.stroke();
+}
+
+    function handleToolbarInput(e) {
+      if (e.target.id === 'colorPicker') {
+        currentContext.strokeStyle = e.target.value;
+      }
+
+      if (e.target.id === 'lineWidth') {
+        lineWidth = e.target.value;
+      }
+    }
+
+    function clearCanvas() {
+      currentContext.clearRect(0, 0, currentCanvas.width, currentCanvas.height);
+      drawingHistory = [];
+    }
+
+    function undoDrawing() {
+      if (drawingHistory.length > 1) {
+        drawingHistory.pop();
+        currentContext.putImageData(drawingHistory[drawingHistory.length - 1], 0, 0);
+      } else {
+        clearCanvas();
+      }
+    }
+
+    function finishDrawing() {
+      const confirmation = window.confirm("형용사를 입력해주세요.");
+
+      if (confirmation) {
+        if (inputContainer.style.display === 'none') {
+          inputContainer.style.display = 'block';
+        } else {
+          const inputValues = Array.from(document.querySelectorAll('.input-box')).map(input => input.value);
+
+          if (!inputContainer.classList.contains('interpreted')) {
+            inputValues.forEach((value, index) => {
+  const canvasNumber = index + 1;
+  const canvasElement = document.getElementById(`canvas${canvasNumber}`);
+              
+  // Create interpretation next to each canvas
+  let interpretation;
+
+  if (canvasNumber === 1) {
+    interpretation = document.createElement('p');
+    interpretation.innerText = `내가 보는 나: ${value}`;
+  } else if (canvasNumber === 2) {
+    interpretation = document.createElement('p');
+    interpretation.innerText = `남이 보는 나: ${value}`;
+  } else if (canvasNumber === 3) {
+    interpretation = document.createElement('p');
+    interpretation.innerText = `나의 인생관: ${value}`;
+  } else if (canvasNumber === 4) {
+    interpretation = document.createElement('p');
+    interpretation.innerText = `나의 잠재의식: ${value}`;
+  } else if (canvasNumber === 5) {
+    interpretation = document.createElement('p');
+    interpretation.innerText = `나의 가족관: ${value}`;
+  } else if (canvasNumber === 6) {
+    interpretation = document.createElement('p');
+    interpretation.innerText = `내가 생각하는 사랑: ${value}`;
+  }
+
+  canvasElement.parentNode.appendChild(interpretation);
+});
+
+            // 입력칸을 다시 숨김
+            inputContainer.style.display = 'none';
+            inputContainer.classList.add('interpreted');
+
+            // 툴바를 숨김
+            toolbar.style.display = 'none';
+          }
+        }
+      } else {
+        window.alert("형용사를 반드시 입력해주세요!");
+      }
+    }
+
+    canvases.forEach(canvas => {
+  canvas.width = 350;
+  canvas.height = 350;
+});
+  </script>
+</body>
+
+</html>

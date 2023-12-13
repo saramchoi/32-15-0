@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>테스트 소개</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        #greeting {
+            text-align: center;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        h2 {
+            font-weight: normal;
+        }
+
+        .blue-box {
+            z-index: -999;
+            width: 1300px;
+            height: 200px;
+            background-color: blue;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            display: none;
+        }
+
+        img {
+            width: 700px;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            display: none;
+        }
+
+        h2 {
+            position: fixed;
+            right: 200px;
+            bottom: 300px;
+            text-align: center;
+            line-height: 1.4;
+            display: none;
+            animation: fontSizeAnimation 2s infinite alternate;
+            transform-origin: bottom left;
+        }
+
+        .black-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: black;
+  background-image: url(f.png);
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  overflow: hidden;
+}
+
+        @keyframes fontSizeAnimation {
+            0% {
+                font-size: 1.5rem;
+                transform: scaleX(1);
+            }
+
+            100% {
+                font-size: 1.6rem;
+                transform: scaleX(1.1);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <p id="greeting"></p>
+    <div class="black-screen" id="blackScreen">
+        <span id="typingEffect"></span>
+    </div>
+
+    <script>
+        var messages = ["시작 전, 간단히 설명해드리겠습니다.", "프랑스의 작가 베르나르 베르베르의 [상상력 사전]에 나온 테스트입니다."];
+        var index = 0;
+
+        function showNextMessage(index) {
+            var messageElement = document.getElementById("greeting");
+            var message = messages[index];
+            var blueBox = document.querySelector('.blue-box');
+            var image = document.querySelector('img');
+            var h2 = document.querySelector('h2');
+            var blackScreen = document.getElementById("blackScreen");
+            var typingEffect = document.getElementById("typingEffect");
+
+            function showNextCharacter() {
+                if (currentIndex < message.length) {
+                    var span = document.createElement('span');
+                    span.textContent = message[currentIndex];
+                    messageElement.appendChild(span);
+                    currentIndex++;
+                    setTimeout(showNextCharacter, 100);
+                } else {
+                    if (message.includes("프랑스의 작가 베르나르 베르베르의 [상상력 사전]에 나온 테스트입니다.")) {
+                        blueBox.style.display = 'block';
+                        image.style.display = 'block';
+                        h2.style.display = 'block';
+
+                        messageElement.style.transition = "top 2s";
+                        messageElement.style.top = "10%";
+                    }
+
+                    if (index === messages.length - 1) {
+                        setTimeout(function () {
+                            messageElement.innerHTML = '';
+                            messageElement.style.transition = "none";
+                            messageElement.style.top = "50%";
+                            blueBox.style.display = 'none';
+                            image.style.display = 'none';
+                            h2.style.display = 'none';
+
+                            blackScreen.style.opacity = 1;
+
+                            typingEffect.innerHTML = '';
+                            var newMessage = "총 6가지 도형에 구체적인 그림을 그려주세요.";
+                            var newIndex = 0;
+
+                            function showNextCharacter() {
+                                if (newIndex < newMessage.length) {
+                                    typingEffect.textContent += newMessage[newIndex];
+                                    newIndex++;
+                                    setTimeout(showNextCharacter, 100);
+                                }
+                            }
+
+                            setTimeout(showNextCharacter, 2000);
+
+                        }, 5000);
+                        return;
+                    }
+
+                    setTimeout(function () {
+                        messageElement.innerHTML = '';
+                        messageElement.style.transition = "none";
+                        messageElement.style.top = "50%";
+                        index++;
+                        showNextMessage(index);
+                    }, 2000);
+                }
+            }
+
+            var currentIndex = 0;
+            messageElement.innerHTML = '';
+            showNextCharacter();
+        }
+
+        showNextMessage(index);
+
+        setTimeout(function () {
+    window.location.href = 'b.html';
+}, 20000);
+
+    </script>
+
+    <img src="b.png">
+    <div class="blue-box"></div>
+    <h2>“여기 간단한 심리테스트가 하나있다.<br><span style='color: blue;'>기하학적 형태의 상징적인 힘</span>을 이용하여<br>어떤 사람을 더 잘 알기 위한 테스트이다.“</h2>
+</body>
+
+</html>

@@ -1,0 +1,24 @@
+:root {
+  --lines: blue;
+  --background: black;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.flex {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+}
+
+.scene {
+  background: var(--background);
+}
+.scene__animation {
+  width: 100vw;
+  height: 100vh;
+}
